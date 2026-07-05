@@ -97,8 +97,7 @@ let serverBackupTimer = null;
 init();
 
 async function init() {
-  await hydrateFromServerBackup();
-  serverBackupEnabled = true;
+  serverBackupEnabled = await hydrateFromServerBackup();
   selectors.planDate.value = activeDate;
   populateDayTypeSelect();
   populateQuestFormOptions();
@@ -361,7 +360,7 @@ function saveWeeklyReviews() {
 }
 
 async function hydrateFromServerBackup() {
-  if (location.protocol === "file:") return;
+  if (location.protocol === "file:") return false;
   try {
     const response = await fetch(SERVER_STATE_ENDPOINT, {
       cache: "no-store",
@@ -369,16 +368,18 @@ async function hydrateFromServerBackup() {
     });
     if (response.status === 401) {
       window.location.href = "/login";
-      return;
+      return false;
     }
-    if (!response.ok) return;
+    if (!response.ok) return false;
     const payload = await response.json();
-    if (!payload?.state) return;
+    if (!payload?.state) return true;
     const merged = mergePersistentStates(collectPersistentState(), normalizePersistentState(payload.state));
     applyPersistentState(merged);
     savePersistentStateLocally();
+    return true;
   } catch (error) {
     console.warn("Server backup could not be loaded.", error);
+    return false;
   }
 }
 
