@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Daily Compass</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand-block">
+          <p class="eyebrow">Quest Board</p>
+          <h1>Daily Compass</h1>
+          <p class="rank-label">3 daily quests / weekly boss</p>
+        </div>
+        <div class="date-picker">
+          <label for="planDate">日付</label>
+          <input id="planDate" type="date">
+        </div>
+      </header>
+
+      <nav class="tabs" aria-label="画面">
+        <button class="tab is-active" type="button" data-view="today">今日</button>
+        <button class="tab" type="button" data-view="week">今週</button>
+        <button class="tab" type="button" data-view="schedule">予定</button>
+        <button class="tab" type="button" data-view="forge">調整</button>
+        <button class="tab" type="button" data-view="rules">ルール</button>
+        <button class="tab" type="button" data-view="history">履歴</button>
+      </nav>
+
+      <main>
+        <section class="view is-active" id="view-today">
+          <div class="today-layout">
+            <section class="quest-board">
+              <div class="board-heading">
+                <div>
+                  <p class="kicker">Daily</p>
+                  <h2 id="todayTitle">今日のクエスト</h2>
+                </div>
+                <div class="quest-count" id="questCount">0/3</div>
+              </div>
+              <div id="todayQuests" class="quest-list"></div>
+            </section>
+
+            <aside class="side-stack">
+              <section class="panel compact-panel">
+                <div class="section-heading">
+                  <div>
+                    <p class="kicker">Status</p>
+                    <h2>今日の扱い</h2>
+                  </div>
+                </div>
+                <div class="compact-body">
+                  <label>
+                    日タイプ
+                    <select id="todayDayType"></select>
+                  </label>
+                  <button class="ghost-button full" id="resetToday" type="button">今日をリセット</button>
+                  <div class="summary-grid" id="todaySummary"></div>
+                </div>
+              </section>
+
+              <section class="panel compact-panel">
+                <div class="section-heading">
+                  <div>
+                    <p class="kicker">Weekly</p>
+                    <h2>今週の状況</h2>
+                  </div>
+                </div>
+                <div class="compact-body">
+                  <div class="mini-list" id="weeklyMini"></div>
+                </div>
+              </section>
+
+              <section class="panel compact-panel">
+                <div class="section-heading">
+                  <div>
+                    <p class="kicker">Guild</p>
+                    <h2>冒険ログ</h2>
+                  </div>
+                </div>
+                <div id="gamePanel" class="game-panel"></div>
+              </section>
+
+              <section class="panel compact-panel">
+                <div class="section-heading">
+                  <div>
+                    <p class="kicker">Road</p>
+                    <h2>冒険の道のり</h2>
+                  </div>
+                </div>
+                <div id="questRoad" class="quest-road"></div>
+              </section>
+
+              <section class="panel compact-panel">
+                <div class="section-heading">
+                  <div>
+                    <p class="kicker">Travel</p>
+                    <h2>外出用メモ</h2>
+                  </div>
+                </div>
+                <div class="compact-body">
+                  <button class="ghost-button full" id="createTravelMemo" type="button">今日の持ち出しメモ作成</button>
+                  <textarea id="travelMemo" class="travel-memo" rows="7" readonly></textarea>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-week">
+          <div class="grid week-grid">
+            <section class="panel weekly-main">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Weekly</p>
+                  <h2>今週のクエスト</h2>
+                </div>
+                <span class="subtle" id="weekLabel"></span>
+              </div>
+              <div id="weeklyQuests" class="weekly-quests"></div>
+            </section>
+
+            <section class="panel">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Balance</p>
+                  <h2>今週の配分</h2>
+                </div>
+              </div>
+              <div id="weekBalance" class="rule-list"></div>
+            </section>
+
+            <section class="panel weekly-review-panel">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Check-in</p>
+                  <h2>週次作戦会議</h2>
+                </div>
+                <span class="subtle" id="weeklyReviewStatus">未保存</span>
+              </div>
+              <div class="weekly-review-body">
+                <strong id="weeklyReviewQuestion"></strong>
+                <textarea id="weeklyReviewInput" rows="4" placeholder="今週の気分や調整したいことを一言で残す"></textarea>
+                <button class="primary-button" id="saveWeeklyReview" type="button">回答を保存</button>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-schedule">
+          <div class="grid schedule-grid">
+            <section class="panel schedule-main">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Calendar</p>
+                  <h2>勤務日・休みの設定</h2>
+                </div>
+              </div>
+              <div class="calendar-toolbar">
+                <button class="small-button" id="schedulePrevMonth" type="button">前月</button>
+                <strong id="scheduleMonthLabel"></strong>
+                <button class="small-button" id="scheduleNextMonth" type="button">次月</button>
+                <button class="ghost-button" id="scheduleTodayMonth" type="button">今月</button>
+              </div>
+              <div class="schedule-note">
+                初期値は月曜休み、火〜金勤務、土曜勤務、日曜は育児あり休日です。
+              </div>
+              <div class="calendar-weekdays" aria-hidden="true">
+                <span>日</span>
+                <span>月</span>
+                <span>火</span>
+                <span>水</span>
+                <span>木</span>
+                <span>金</span>
+                <span>土</span>
+              </div>
+              <div id="scheduleCalendar" class="schedule-calendar"></div>
+            </section>
+
+            <section class="panel">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Defaults</p>
+                  <h2>日タイプ</h2>
+                </div>
+              </div>
+              <div id="dayTypeLegend" class="rule-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-forge">
+          <div class="grid forge-grid">
+            <section class="panel forge-main">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Forge</p>
+                  <h2>クエスト追加</h2>
+                </div>
+              </div>
+              <form id="questForm" class="quest-form">
+                <label class="wide-field">
+                  タイトル
+                  <input id="customTitle" type="text" maxlength="48" required>
+                </label>
+
+                <fieldset class="field-box wide-field">
+                  <legend>分類</legend>
+                  <div class="check-grid" id="categoryChecks"></div>
+                </fieldset>
+
+                <label>
+                  重さ
+                  <select id="customWeight">
+                    <option value="light">軽め</option>
+                    <option value="medium">普通</option>
+                    <option value="heavy">重め</option>
+                  </select>
+                </label>
+
+                <label>
+                  頻度
+                  <select id="customFrequency">
+                    <option value="medium">普通</option>
+                    <option value="high">高め</option>
+                    <option value="low">低め</option>
+                  </select>
+                </label>
+
+                <label>
+                  想定分
+                  <input id="customMinutes" type="number" min="1" max="180" value="10">
+                </label>
+
+                <fieldset class="field-box wide-field">
+                  <legend>出してよい日</legend>
+                  <div class="check-grid" id="dayFitChecks"></div>
+                </fieldset>
+
+                <label class="wide-field">
+                  メモ
+                  <textarea id="customDetail" rows="3"></textarea>
+                </label>
+
+                <label class="wide-field">
+                  Codex向け補足
+                  <textarea id="customSourceNote" rows="3"></textarea>
+                </label>
+
+                <div class="form-actions wide-field">
+                  <button class="primary-button" type="submit">候補に追加</button>
+                  <button class="ghost-button" id="clearQuestForm" type="button">クリア</button>
+                </div>
+  </form>
+  <p class="form-message" id="forgeMessage" aria-live="polite"></p>
+</section>
+
+            <section class="panel quest-tuning-panel">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Tune</p>
+                  <h2>クエスト詳細調整</h2>
+                </div>
+              </div>
+              <div id="questTuningList" class="custom-list"></div>
+            </section>
+
+            <section class="panel weekly-tuning-panel">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Weekly Tune</p>
+                  <h2>週クエスト詳細調整</h2>
+                </div>
+              </div>
+              <div id="weeklyTuningList" class="custom-list"></div>
+            </section>
+
+            <section class="panel">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Custom</p>
+                  <h2>アプリ追加候補</h2>
+                </div>
+              </div>
+              <div id="customQuestList" class="custom-list"></div>
+            </section>
+
+            <section class="panel remove-panel">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Remove</p>
+                  <h2>クエスト除外</h2>
+                </div>
+              </div>
+              <form id="removeQuestForm" class="remove-form">
+                <label>
+                  除外したいクエスト
+                  <select id="removeQuestSelect"></select>
+                </label>
+                <label>
+                  理由
+                  <textarea id="removeQuestReason" rows="3" required></textarea>
+                </label>
+                <button class="primary-button full" type="submit">出さない候補にする</button>
+              </form>
+              <div id="removedQuestList" class="custom-list"></div>
+            </section>
+
+            <section class="panel codex-panel">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Codex</p>
+                  <h2>連携メモ</h2>
+                </div>
+              </div>
+              <div class="codex-tools">
+                <label>
+                  Codexに伝えたいこと
+                  <textarea id="codexNoteInput" rows="4"></textarea>
+                </label>
+                <div class="form-actions">
+                  <button class="primary-button" id="saveCodexNote" type="button">メモ保存</button>
+                  <button class="ghost-button" id="exportCodexData" type="button">Codex用データ作成</button>
+                </div>
+                <textarea id="codexDataOutput" rows="8" readonly></textarea>
+                <label>
+                  CodexからのJSON
+                  <textarea id="codexImportInput" rows="6"></textarea>
+                </label>
+                <button class="primary-button full" id="importCodexData" type="button">JSONを取り込む</button>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-rules">
+          <div class="grid rules-grid">
+            <section class="panel">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Rules</p>
+                  <h2>現在の考え方</h2>
+                </div>
+              </div>
+              <div id="rulesOverview" class="rule-list"></div>
+            </section>
+
+            <section class="panel rule-pool-panel">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Pool</p>
+                  <h2>クエスト候補</h2>
+                </div>
+              </div>
+              <div id="questPool" class="quest-pool"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-history">
+          <div class="grid history-grid">
+            <section class="panel">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Stats</p>
+                  <h2>積み上げ</h2>
+                </div>
+              </div>
+              <div id="historyStats" class="review-grid"></div>
+            </section>
+
+            <section class="panel">
+              <div class="section-heading">
+                <div>
+                  <p class="kicker">Log</p>
+                  <h2>最近の履歴</h2>
+                </div>
+                <button class="ghost-button" id="exportProgress" type="button">エクスポート</button>
+                <button class="ghost-button" id="importProgress" type="button">バックアップ取り込み</button>
+              </div>
+              <div id="historyLog" class="history-log"></div>
+              <textarea id="dataOutput" rows="8"></textarea>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="emptyStateTemplate">
+      <div class="empty-state">
+        <strong></strong>
+        <span></span>
+      </div>
+    </template>
+
+    <script src="quest-rules.js?v=14"></script>
+    <script src="app.js?v=19"></script>
+  </body>
+</html>
