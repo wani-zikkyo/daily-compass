@@ -1,5 +1,5 @@
 window.DAILY_COMPASS_RULES = {
-  version: 3,
+  version: 4,
   dailyQuestCount: 3,
   priorities: [
     { id: "pokemon", label: "ポケモン活動", weight: 100 },
@@ -178,6 +178,16 @@ window.DAILY_COMPASS_RULES = {
       frequency: "medium",
       dayFit: ["work", "mondayRest", "childcareRest", "specialRest"],
       detail: "行動のスイッチを入れるための軽いタスク。",
+    },
+    {
+      id: "diet-asken-log",
+      title: "あすけんに食事を入力する",
+      categories: ["diet"],
+      weight: "light",
+      minutes: 5,
+      frequency: "medium",
+      dayFit: ["work", "mondayRest", "childcareRest", "specialRest"],
+      detail: "食事内容を完璧に記録しようとせず、意識を切らさないためにざっくり入力する。",
     },
     {
       id: "diet-weight",
