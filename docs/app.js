@@ -17,6 +17,7 @@ const FREQUENCY_IDS = ["low", "medium", "high"];
 const WEEKLY_WEIGHT_IDS = ["light", "medium", "heavy"];
 const WEEKLY_QUEST_XP = 45;
 const WEEK_START_DAY = 2;
+const DAY_ROLLOVER_HOUR = 5;
 const DAILY_PLAN_RULE_VERSION = 3;
 
 const selectors = {
@@ -2707,7 +2708,11 @@ function daysBetween(fromDateKey, toDateKey) {
 }
 
 function todayKey() {
-  return formatDate(new Date());
+  const date = new Date();
+  if (date.getHours() < DAY_ROLLOVER_HOUR) {
+    date.setDate(date.getDate() - 1);
+  }
+  return formatDate(date);
 }
 
 function parseDate(dateKey) {
