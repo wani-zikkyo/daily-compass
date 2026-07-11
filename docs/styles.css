@@ -118,6 +118,18 @@ button:disabled {
   font-weight: 900;
 }
 
+.version-label {
+  width: fit-content;
+  margin: 4px 0 0;
+  border: 1px solid rgba(255, 253, 246, 0.28);
+  border-radius: 999px;
+  padding: 3px 8px;
+  color: rgba(255, 253, 246, 0.88);
+  font-size: 0.75rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
 h1,
 h2,
 h3,

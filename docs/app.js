@@ -11,6 +11,7 @@ const WEEKLY_TUNING_KEY = "daily-compass-weekly-tuning-v1";
 const WEEKLY_REVIEW_KEY = "daily-compass-weekly-review-v1";
 const LEGACY_KEY = "daily-compass-state-v1";
 const SERVER_STATE_ENDPOINT = "/api/state";
+const APP_VERSION = "5.6";
 const DAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
 const WEIGHT_IDS = ["light", "medium", "heavy"];
 const FREQUENCY_IDS = ["low", "medium", "high"];
@@ -80,6 +81,7 @@ const selectors = {
   importProgress: document.querySelector("#importProgress"),
   dataOutput: document.querySelector("#dataOutput"),
   emptyTemplate: document.querySelector("#emptyStateTemplate"),
+  appVersion: document.querySelector("#appVersion"),
 };
 
 let activeDate = todayKey();
@@ -100,6 +102,9 @@ init();
 async function init() {
   serverBackupEnabled = await hydrateFromServerBackup();
   selectors.planDate.value = activeDate;
+  if (selectors.appVersion) {
+    selectors.appVersion.textContent = `v${APP_VERSION} / rules ${RULES.version}`;
+  }
   populateDayTypeSelect();
   populateQuestFormOptions();
   bindEvents();
@@ -612,6 +617,8 @@ function renderTodaySummary(plan, dayType) {
     ["分類", compactCategorySummary(categories)],
     ["重め", `${heavyCount}/${dayType.heavyLimit}`],
     ["入れ替え", `${getDateEvents(activeDate, "reroll").length}回`],
+    ["切替", `${DAY_ROLLOVER_HOUR}:00`],
+    ["仕様", `v${APP_VERSION} / rules ${RULES.version}`],
   ].forEach(([label, value]) => {
     const item = document.createElement("div");
     item.className = "summary-item";
@@ -1392,6 +1399,8 @@ function renderRemovedQuestList() {
 function renderRules() {
   selectors.rulesOverview.innerHTML = "";
   [
+    `アプリ仕様はv${APP_VERSION}。ルール定義はversion ${RULES.version}。`,
+    `デイリーの切り替えは0時ではなく${DAY_ROLLOVER_HOUR}:00。深夜の配信後チェックは前日分として扱う。`,
     ...RULES.generationRules,
     "ウィークリー期間は火曜日から月曜日。月曜日を1週間の締め日として扱う。",
     "アプリで追加したクエスト候補は別保存し、標準候補と一緒に抽選対象にする。",

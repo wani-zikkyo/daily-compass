@@ -1,5 +1,5 @@
 window.DAILY_COMPASS_RULES = {
-  version: 4,
+  version: 5.6,
   dailyQuestCount: 3,
   priorities: [
     { id: "pokemon", label: "ポケモン活動", weight: 100 },
