@@ -11,7 +11,7 @@ const WEEKLY_TUNING_KEY = "daily-compass-weekly-tuning-v1";
 const WEEKLY_REVIEW_KEY = "daily-compass-weekly-review-v1";
 const LEGACY_KEY = "daily-compass-state-v1";
 const SERVER_STATE_ENDPOINT = "/api/state";
-const APP_VERSION = "5.6";
+const APP_VERSION = "5.6.1";
 const DAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
 const WEIGHT_IDS = ["light", "medium", "heavy"];
 const FREQUENCY_IDS = ["low", "medium", "high"];
@@ -19,6 +19,7 @@ const WEEKLY_WEIGHT_IDS = ["light", "medium", "heavy"];
 const WEEKLY_QUEST_XP = 45;
 const WEEK_START_DAY = 2;
 const DAY_ROLLOVER_HOUR = 5;
+const DAY_ROLLOVER_CHECK_INTERVAL_MS = 60 * 1000;
 const DAILY_PLAN_RULE_VERSION = 3;
 
 const selectors = {
@@ -84,7 +85,8 @@ const selectors = {
   appVersion: document.querySelector("#appVersion"),
 };
 
-let activeDate = todayKey();
+let logicalToday = todayKey();
+let activeDate = logicalToday;
 let progress = loadProgress();
 let schedule = loadSchedule();
 let customQuests = loadCustomQuests();
@@ -96,6 +98,7 @@ let weeklyReviews = loadWeeklyReviews();
 let scheduleCursor = startOfMonth(parseDate(activeDate));
 let serverBackupEnabled = false;
 let serverBackupTimer = null;
+let dayRolloverTimer = null;
 
 init();
 
@@ -108,8 +111,32 @@ async function init() {
   populateDayTypeSelect();
   populateQuestFormOptions();
   bindEvents();
+  startDayRolloverWatcher();
   renderAll();
   scheduleServerBackup();
+}
+
+function startDayRolloverWatcher() {
+  if (dayRolloverTimer) window.clearInterval(dayRolloverTimer);
+  dayRolloverTimer = window.setInterval(syncDayRollover, DAY_ROLLOVER_CHECK_INTERVAL_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") syncDayRollover();
+  });
+  window.addEventListener("focus", syncDayRollover);
+}
+
+function syncDayRollover() {
+  const currentToday = todayKey();
+  if (currentToday === logicalToday) return;
+
+  const wasShowingToday = activeDate === logicalToday;
+  logicalToday = currentToday;
+  if (!wasShowingToday) return;
+
+  activeDate = currentToday;
+  selectors.planDate.value = activeDate;
+  scheduleCursor = startOfMonth(parseDate(activeDate));
+  renderAll();
 }
 
 function bindEvents() {
